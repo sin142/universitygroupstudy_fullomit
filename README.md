@@ -1,0 +1,2 @@
+# universitygroupstudy_fullomit
+グループ研究に利用するアプリの色んな機能をオミットし、プレーンにしたバージョン
