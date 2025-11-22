@@ -16,9 +16,7 @@
             --text-color: #1c1c1e;    /* テキスト色 */
             --text-subtle-color: #6a6a6e; /* サブテキスト色 */
             --border-color: #e0e0e0;   /* 境界線 */
-            --gauge-bg: #696969;      /* ゲージ背景 (容器の背景色) */
-            --gauge-border: #000000;  /* ゲージの縁取り (黒) */
-            --gauge1-fill: #34c759;   /* ゲージ1（緑） */
+            --gauge1-fill: #34c759;   /* アプリ残高（緑）文字色用 */
             --payment-color: #ff3b30; /* 支払金額（赤） */
         }
 
@@ -113,23 +111,8 @@
         .result-label { font-size: 1rem; font-weight: 500; color: var(--text-subtle-color); }
         .result-amount { font-size: 1.2rem; font-weight: 600; }
 
-        /* ゲージの基本スタイル */
-        .gauge-container {
-            width: 100%;
-            height: 24px;
-            border: 2px solid var(--gauge-border); /* 容器の縁取り (黒) */
-            box-sizing: border-box; /* 縁取りを高さに含める */
-            overflow: hidden;
-            position: relative;
-            background-color: var(--gauge-bg); /* 容器背景 (灰) */
-        }
-
-        /* ゲージ1: 局所ゲージ */
-        #gauge1-fill {
-            height: 100%;
-            width: 100%; /* 初期値 */
-            background-color: var(--gauge1-fill);
-        }
+        /* (★ 整理済み) ゲージ関連の不要なCSS (.gauge-container, #gauge1-fill 等) を削除しました
+        */
         
         /* 支払い金額（赤色） */
         #display-payment-amount {
@@ -188,7 +171,7 @@
         </div>
     </div>
 
-    <!-- 画面E： 決済完了 (シンプル版: ゲージなし) -->
+    <!-- 画面E： 決済完了 (シンプル版: 数字のみ) -->
     <div id="screenE" class="screen">
         <div class="container">
             <h2>支払い完了</h2>
@@ -207,8 +190,6 @@
                     <span class="result-label">アプリ内残高</span>
                     <span class="result-amount" id="display-app-balance-after">0円</span>
                 </div>
-                <!-- (★ 削除) ゲージ表示を削除 -->
-                <!-- <div id="gauge1" class="gauge-container">...</div> -->
             </div>
             
             <button id="btn-return-to-home" class="secondary">ホームへ戻る</button>
@@ -252,7 +233,6 @@
                     document.getElementById('input-payment-amount').value = '';
                     startQRScanner();
                 } else if (screenId === 'screenE') {
-                    // (★ 修正) アニメーション関数ではなく、数字表示更新関数を呼ぶ
                     updatePaymentResultScreen();
                 }
             }
@@ -279,11 +259,14 @@
                 const chargeAmount = parseFloat(document.getElementById('input-charge-amount').value);
                 
                 if (isNaN(chargeAmount) || chargeAmount <= 0) {
-                    console.warn("有効なチャージ金額を入力してください。"); return;
+                    console.warn("有効なチャージ金額を入力してください。"); 
+                    // alert("有効なチャージ金額を入力してください。");
+                    return;
                 }
                 const MAX_CHARGE = 100000;
                 if (chargeAmount > MAX_CHARGE) {
                     console.warn("チャージ上限(10万円)を超えています"); 
+                    // alert("チャージ上限(10万円)を超えています"); 
                     return;
                 }
                 
@@ -302,10 +285,14 @@
                 const paymentAmount = parseFloat(document.getElementById('input-payment-amount').value);
                 
                 if (isNaN(paymentAmount) || paymentAmount <= 0) {
-                    console.warn("有効な支払金額を入力してください。"); return;
+                    console.warn("有効な支払金額を入力してください。"); 
+                    // alert("有効な支払金額を入力してください。");
+                    return;
                 }
                 if (paymentAmount > experimentState.appBalance) {
-                    console.warn("残高不足です"); return;
+                    console.warn("残高不足です"); 
+                    // alert("残高不足です");
+                    return;
                 }
                 
                 experimentState.paymentAmount = paymentAmount;
@@ -372,27 +359,13 @@
             animationFrameId = requestAnimationFrame(tick);
         }
 
-        /* --- 4.5. 画面E: 決済完了画面更新 (シンプル版: 数字のみ) --- */
-        
-        // (★ 削除) ゲージ要素の取得は不要
-        // const gauge1Fill = document.getElementById('gauge1-fill');
-
-        // (★ 変更) アニメーションではなく、単純な表示更新関数にする
+        /* --- 4.5. 画面E: 決済完了画面更新 (数字のみ) --- */
         function updatePaymentResultScreen() {
-            // データ読み込み
-            const {
-                paymentAmount,
-                appBalance, // 支払い後
-                appBalanceBeforePayment
-            } = experimentState;
-
+            const { paymentAmount, appBalance, appBalanceBeforePayment } = experimentState;
             const preciseAppBalance = appBalanceBeforePayment - paymentAmount;
 
-            // 数字情報を即座に表示
             document.getElementById('display-payment-amount').textContent = `- ${formatCurrency(paymentAmount)}円`;
             document.getElementById('display-app-balance-after').textContent = `${formatCurrency(preciseAppBalance)}円`;
-            
-            // (★ 削除) ゲージに関する計算とアニメーション処理を全て削除
         }
     </script>
 </body>
